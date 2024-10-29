@@ -1,4 +1,4 @@
-package player
+package aditya.wibisana.voiceping.player
 
 interface Codec {
     fun decode(input: ByteArray) : ByteArray

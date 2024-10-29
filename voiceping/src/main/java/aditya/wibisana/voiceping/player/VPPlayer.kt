@@ -1,4 +1,4 @@
-package player
+package aditya.wibisana.voiceping.player
 
 import android.media.AudioFormat
 import android.media.AudioManager

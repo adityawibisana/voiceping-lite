@@ -1,10 +1,9 @@
-package aditya.wibisana.vplite
+package aditya.wibisana.voiceping
 
 import okhttp3.OkHttpClient
 import org.junit.Test
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import voiceping.API
 
 class SignInAPITest {
     private val okHttpClient = OkHttpClient()
@@ -16,7 +15,7 @@ class SignInAPITest {
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
-    val api: API = retrofit.create(API::class.java)
+    val api: aditya.wibisana.voiceping.API = retrofit.create(aditya.wibisana.voiceping.API::class.java)
 
     @Test
     fun signIn() {
