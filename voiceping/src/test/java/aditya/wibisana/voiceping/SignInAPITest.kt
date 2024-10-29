@@ -1,24 +1,18 @@
 package aditya.wibisana.voiceping
 
-import aditya.wibisana.voiceping.player.ConnectionState
-import aditya.wibisana.voiceping.player.VPWebSocketClient
-import kotlinx.coroutines.CompletableDeferred
+import aditya.wibisana.voiceping.socket.ConnectionState
+import aditya.wibisana.voiceping.socket.VPWebSocketClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.java_websocket.client.WebSocketClient
-import org.java_websocket.drafts.Draft_6455
-import org.java_websocket.handshake.ServerHandshake
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import java.net.URI
-import javax.net.ssl.SSLSocketFactory
 
 class SignInAPITest {
     private val api = APIService().api

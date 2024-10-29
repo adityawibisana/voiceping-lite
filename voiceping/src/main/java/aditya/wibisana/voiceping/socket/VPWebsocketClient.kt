@@ -1,8 +1,9 @@
-package aditya.wibisana.voiceping.player
+package aditya.wibisana.voiceping.socket
 
+import aditya.wibisana.voiceping.Logger
+import aditya.wibisana.voiceping.LoggerImp
 import android.annotation.SuppressLint
 import android.os.Build
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -35,11 +36,14 @@ class VPWebSocketClient(
     httpHeaders: MutableMap<String, String>?,
     connectTimeout: Int,
     private val socketId: Int,
+    private val socketMessageMessenger: SocketMessageMessenger,
+    private val logger: Logger = LoggerImp(),
     protocolDraft: Draft = Draft_6455()
 ) : WebSocketClient(socketServerUri, protocolDraft, httpHeaders, connectTimeout) {
 
     private val _connectionState = MutableStateFlow(ConnectionState.CONNECTING)
     val connectionState = _connectionState.asStateFlow()
+
 
     private val tag = "VPWebSocketClient"
     var lastWebSocketPing = 0L
@@ -126,9 +130,7 @@ class VPWebSocketClient(
     // NOT triggered when turned off network manually from setting. So, this one, along with onClose is needed
     override fun onClosing(code: Int, reason: String?, remote: Boolean) {
         isSendingMessageAllowed = false
-
         log("onClosing. Reason:$reason Remote:$remote url:$socketServerUri lastConnected:${((System.currentTimeMillis() - lastConnected)/1000).toInt()} lastClean:${((System.currentTimeMillis() - lastConnectionClean)/1000).toInt()} lastPing:${((System.currentTimeMillis() - lastWebSocketPing)/1000).toInt()}")
-
         _connectionState.value = ConnectionState.DISCONNECTED
         super.onClosing(code, reason, remote)
     }
@@ -142,21 +144,9 @@ class VPWebSocketClient(
     override fun onMessage(message: String?) { }
 
     override fun onMessage(bytes: ByteBuffer?) {
-        super.onMessage(bytes) // if clean, do something here
-        try {
-//            val message = MessageHelper.getInstance().unpackMessage(bytes?.array()) ?: return
-//
-//            log("t:${message.messageType} S:${message.senderUserId} T:${message.receiveChannelId} Ct:${message.channelType}")
-//            if (message.messageType == MessageType.connection_is_clean.type) {
-//                log("connection test: success")
-//                connectionState = ConnectionState.CONNECTED_CLEAN
-//                lastConnectionClean = System.currentTimeMillis()
-//            } else {
-//                WebSocketClientManager.processMessage(socketId, message)
-//            }
-
-        } catch (e: Exception) {
-            e.printStackTrace()
+        super.onMessage(bytes)
+        if (isSendingMessageAllowed && bytes != null) {
+            socketMessageMessenger.send(bytes)
         }
     }
 
@@ -213,7 +203,7 @@ class VPWebSocketClient(
     }
 
     private fun log(message: String) {
-//        Log.v(tag, "socketId:$socketId $message")
+        logger.log("socketId:$socketId $message")
     }
 }
 
