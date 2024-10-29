@@ -39,6 +39,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    implementation(libs.java.websocket)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
