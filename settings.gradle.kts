@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "VPLite"
 include(":app")
- 
+include(":voiceping")
