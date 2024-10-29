@@ -1,11 +1,16 @@
 package aditya.wibisana.voiceping
 
+import aditya.wibisana.voiceping.player.ConnectionState
+import aditya.wibisana.voiceping.player.VPWebSocketClient
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.drafts.Draft_6455
 import org.java_websocket.handshake.ServerHandshake
@@ -37,44 +42,27 @@ class SignInAPITest {
     }
 
     @Test
-    fun createSocketClient() = runBlocking {
-        val scope = CoroutineScope(Job())
-
+    fun createSocketClient(): Unit = runBlocking {
         val uri = URI(serverSocketUrl)
         val header = HashMap<String, String>()
         header["VoicePingToken"] = uuid
-        header["DeviceId"] = "Android / IOS id"
-
-        client = object: WebSocketClient(uri, Draft_6455(), header, 0) {
-            override fun onOpen(handshakedata: ServerHandshake?) {
-                println("onOpen. Uri:${this.uri.host}")
-                scope.cancel("Finished. Connected")
-            }
-
-            override fun onClose(code: Int, reason: String?, remote: Boolean) {
-                println("onClose. Code:$code reason:$reason remote:$remote")
-            }
-
-            override fun onMessage(message: String?) {
-                println("onMessage")
-            }
-
-            override fun onError(ex: Exception?) {
-                println("onError")
-            }
-
+        header["DeviceId"] = "Android unit test - Aditya Wibisana"
+        withTimeout(10_000) {
+            val ws = VPWebSocketClient(uri, header, 10_000, 1)
+            val scope = CoroutineScope(Job())
+            scope.launch {
+                ws.connectionState.collectLatest {
+                    when (it) {
+                        ConnectionState.CONNECTING -> { }
+                        ConnectionState.CONNECTED -> {
+                            println("Connected to ${uri.host}")
+                            scope.cancel()
+                        }
+                        ConnectionState.CONNECTED_CLEAN -> { }
+                        ConnectionState.DISCONNECTED -> { }
+                    }
+                }
+            }.join()
         }
-        client.setSocketFactory(SSLSocketFactory.getDefault())
-        client.connect()
-        println("Connect executed")
-        scope.launch {
-            delay(10_000)
-            throw(Error("Connection takes too long!"))
-        }.join()
-    }
-
-    @After
-    fun tearDown() {
-        client.close() // Close the WebSocket connection after each test
     }
 }
