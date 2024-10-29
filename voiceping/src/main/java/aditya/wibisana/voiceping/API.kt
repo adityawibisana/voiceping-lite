@@ -13,7 +13,7 @@ const val grant_type = "password"
 
 interface API {
     @FormUrlEncoded
-    @POST("/v2/oauth/token")
+    @POST("v2/oauth/token")
     fun signIn(
         @Field("username") username: String,
         @Field("password") pwd: String,

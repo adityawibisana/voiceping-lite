@@ -6,29 +6,17 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.drafts.Draft_6455
 import org.java_websocket.handshake.ServerHandshake
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.net.URI
 import javax.net.ssl.SSLSocketFactory
 
 class SignInAPITest {
-    private val okHttpClient = OkHttpClient()
-        .newBuilder()
-        .build()
-
-    private val retrofit = Retrofit.Builder()
-        .baseUrl("https://voiceoverping.net/")
-        .client(okHttpClient)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-    private val api: API = retrofit.create(API::class.java)
+    private val api = APIService().api
     private lateinit var uuid: String
     private lateinit var serverSocketUrl: String
     private lateinit var client: WebSocketClient
